@@ -1,18 +1,11 @@
-\documentclass[preprint,10pt]{elsarticle}
+\documentclass[a4paper,fleqn]{cas-dc}
 
-% Vector fonts with a Unicode map, so that PDF text extraction (and journal checkers)
-% read ligatures such as fi/fl correctly instead of Type 3 bitmaps.
+% Unicode map for ligatures, so PDF text extraction (and journal checkers) read fi/fl correctly.
 \input{glyphtounicode}
 \pdfgentounicode=1
-\usepackage[T1]{fontenc}
-\usepackage{lmodern}
 
-\usepackage{amsmath,amssymb}
-\usepackage{graphicx}
-\usepackage{booktabs}
+\usepackage[numbers,sort&compress]{natbib}
 \usepackage{tabularx}
-\usepackage{array}
-\usepackage{xcolor}
 \usepackage{url}
 \usepackage{enumitem}
 \usepackage{algorithm}
@@ -22,65 +15,67 @@
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
 \newif\ifshoworacle
-\showoracletrue % set \showoraclefalse to hide Selection-Matched values in the new figures
-\usepackage[hidelinks]{hyperref}
+\showoracletrue % set \showoraclefalse to hide Selection-Matched values in the figures
 
-% Document formatting adjustments for academic readability and clean float placement
 \setlength{\emergencystretch}{3em}
-\renewcommand{\topfraction}{0.9}
-\renewcommand{\bottomfraction}{0.8}
-\renewcommand{\textfraction}{0.07}
-\renewcommand{\floatpagefraction}{0.75}
-\setcounter{totalnumber}{4}
-\setlength{\abovecaptionskip}{4pt}
-\setlength{\belowcaptionskip}{2pt}
-\setlength{\textfloatsep}{8pt plus 1pt minus 2pt}
-\setlength{\intextsep}{6pt plus 1pt minus 1pt}
-\setlength{\abovedisplayskip}{4pt plus 1pt minus 1pt}
-\setlength{\belowdisplayskip}{4pt plus 1pt minus 1pt}
-
-\journal{Natural Language Processing Journal}
+% The class always prints an `ORCID(s):' footnote; add orcid=... to each \\author[..]{..}[orcid=...] and delete this line.
+\RenewDocumentCommand{\printorcid}{}{}
+\renewcommand{\sfdefault}{lmss}
 
 \begin{document}
+\let\WriteBookmarks\relax
+\def\floatpagepagefraction{1}
+\def\textpagefraction{.001}
 
 \input{paper_tables/numbers.tex}
 
+\shorttitle{Procedure selection versus workflow structuring in local RAG}
+\shortauthors{C.F. Wiratama et al.}
 
-\begin{frontmatter}
+\title[mode = title]{Procedure Selection versus Workflow Structuring in Local RAG for Institutional SOP Question Answering: An Ablation Study}
 
-\title{Procedure Selection versus Workflow Structuring in Local RAG for Institutional SOP Question Answering: An Ablation Study}
-
-\author[undip]{Cipta Fikri Wiratama}
+\author[1]{Cipta Fikri Wiratama}
 \ead{fikriw@students.undip.ac.id}
+\credit{Conceptualization, Methodology, Software, Data curation, Validation, Investigation, Writing -- original draft}
 
-\author[undip]{Indra Waspada\corref{cor1}}
+\author[1]{Indra Waspada}
+\cormark[1]
 \ead{indrawaspada@lecturer.undip.ac.id}
+\credit{Conceptualization, Supervision, Writing -- review \& editing}
 
-\author[undip]{Dhena Kamalia Fu'adi}
+\author[1]{Dhena Kamalia Fu'adi}
+\credit{Data curation, Validation, Writing -- review \& editing}
 
-\author[usm]{Ramona Ramli\corref{cor1}}
+\author[2]{Ramona Ramli}
+\cormark[1]
 \ead{ramona@usm.my}
+\credit{Conceptualization, Methodology, Supervision, Writing -- review \& editing}
 
-\author[undip]{Henri Tantyoko}
+\author[1]{Henri Tantyoko}
+\credit{Methodology, Validation, Writing -- review \& editing}
 
-\author[undip]{Sandy Kurniawan}
+\author[1]{Sandy Kurniawan}
+\credit{Supervision, Methodology, Writing -- review \& editing}
 
-\author[undip]{Satriawan Rasyid Purnama}
+\author[1]{Satriawan Rasyid Purnama}
+\credit{Validation, Formal analysis, Writing -- review \& editing}
 
-\cortext[cor1]{Corresponding author}
-
-\affiliation[undip]{organization={Department of Informatics, Faculty of Science and Mathematics, Universitas Diponegoro},
+\affiliation[1]{organization={Department of Informatics, Faculty of Science and Mathematics, Universitas Diponegoro},
             city={Semarang},
             postcode={50275},
             country={Indonesia}}
 
-\affiliation[usm]{organization={School of Computer Sciences, Universiti Sains Malaysia},
+\affiliation[2]{organization={School of Computer Sciences, Universiti Sains Malaysia},
             city={Pulau Pinang},
             postcode={11800 USM},
             country={Malaysia}}
 
+\cortext[1]{Corresponding authors}
+
+\nonumnote{Word count: 7,139 words including references (6,402 excluding references).}
+
 \begin{abstract}
-\textbf{Background:} Standard operating procedures (SOPs) in university administration require answers that preserve step order, responsible actors, and required documents, yet locally hosted small language models are easily distracted by passages from lexically overlapping procedures.
+\noindent\textbf{Background:} Standard operating procedures (SOPs) in university administration require answers that preserve step order, responsible actors, and required documents, yet locally hosted small language models are easily distracted by passages from lexically overlapping procedures.
 
 \textbf{Methods:} We pair rule-based procedure selection with directed workflow graphs that encode chronological steps and responsible actors (Workflow GraphRAG). We compare it with nine configurations, including a selection-matched ablation that supplies the same selected SOP as raw text, on a verified 40-question benchmark over seven Indonesian institutional SOPs, using a local generator (\texttt{gemma4:e2b}, 5.1B parameters).
 
@@ -89,13 +84,17 @@
 \textbf{Conclusions:} Procedure-level selection is the primary driver of factual recall in concise procedural corpora, while workflow graphs provide chronological formatting integrity and token efficiency.
 \end{abstract}
 
-\begin{keyword}
+% Highlights are submitted as a separate file (highlights.txt) to keep the manuscript word count down.
+% Uncomment to include them in the manuscript instead.
+%\begin{highlights}
+%\item ...
+%\end{highlights}
+
+\begin{keywords}
 Retrieval-augmented generation \sep GraphRAG \sep Standard operating procedures \sep Workflow representation \sep Small language models \sep Ablation study \sep Evaluation metrics
-\end{keyword}
+\end{keywords}
 
-\end{frontmatter}
-
-\noindent{\small\textit{Word count:} 7,303 words including references (6,566 excluding references).}\par
+\maketitle
 
 %% ===================================================================
 \section{Introduction}
@@ -139,7 +138,7 @@ Business Process Management models procedures as directed workflows \cite{dumas2
 \subsection{Emerging order-aware and procedural RAG}
 SOPRAG \cite{lin2026sedrag} retrieves industrial SOPs with flow-graph and entity-graph experts, and Order-Aware Hypergraph RAG \cite{wu2026okhrag} models transitions over hyperedges. Both use learned indexing at scale, and neither separates the effect of selecting the right procedure from that of structuring it; we isolate this for small local models over institutional workflows. Table~\ref{tab:positioning} contrasts the context units each method family passes to the generator.
 
-\begin{table}[!htbp]
+\begin{table*}[!t]
 \centering
 \caption{Structural characteristics of context units provided to the generator across retrieval paradigms. ``Implicit'' denotes that information is present in prose but requires model inference.}
 \label{tab:positioning}
@@ -154,7 +153,7 @@ Workflow GraphRAG (this work) & Directed workflow block \& chunks & Explicit & E
 Selection-Matched Text (ablation) & Whole selected SOP text \& chunks & Implicit & Implicit \\
 \bottomrule
 \end{tabularx}
-\end{table}
+\end{table*}
 
 %% ===================================================================
 \section{Problem setting and procedural error classes}
@@ -188,7 +187,7 @@ Total & 44 & 44 & 8,541 & 1,097 \\
 }
 \end{table}
 
-\begin{figure}[!htbp]
+\begin{figure*}[!t]
 \centering
 \resizebox{\textwidth}{!}{%
 \begin{tikzpicture}[
@@ -239,11 +238,11 @@ Total & 44 & 44 & 8,541 & 1,097 \\
 \end{tikzpicture}}
 \caption{Anatomy of an FSM SOP document and its mapping to workflow-graph attributes, shown for step 1 of the legalisation SOP. The underlined grammatical subject becomes the performing actor, the optional \emph{Waktu}, \emph{Dokumen yang dibutuhkan}, and \emph{Output} lines become duration, input, and output attributes, and the step sentence is stored verbatim as evidence.}
 \label{fig:sopdoc}
-\end{figure}
+\end{figure*}
 
 The steps are performed by 15 roles from the student to the university level (Figure~\ref{fig:actors}). Students perform 21 of the 44 steps in six of the seven SOPs, and several faculty roles act in more than one procedure, so SOPs share actors as well as vocabulary.
 
-\begin{figure}[!htbp]
+\begin{figure*}[!t]
 \centering
 \resizebox{\textwidth}{!}{%
 \begin{tikzpicture}[x=12.5mm, y=-4.6mm,
@@ -304,7 +303,7 @@ The steps are performed by 15 roles from the student to the university level (Fi
 \end{tikzpicture}}
 \caption{Organisational roles that perform SOP steps, grouped by administrative level, and the number of steps each performs per SOP (\texttt{PERFORMS} edges; darker cells denote more steps). Roles that only approve, sign, or receive copies within a step, such as the Head of Study Programme in the leave procedure, are recorded in action descriptions and not counted.}
 \label{fig:actors}
-\end{figure}
+\end{figure*}
 
 \subsection{Procedural correctness requirements and error taxonomy}
 A correct administrative answer lists the mandatory steps in execution order, attributes each action to the right official, and states prerequisites and deliverables. We define three failure modes:
@@ -315,7 +314,7 @@ A correct administrative answer lists the mandatory steps in execution order, at
 \end{itemize}
 Table~\ref{tab:errormap} maps each error class to the metric that measures it and to the design component intended to address it.
 
-\begin{table}[!htbp]
+\begin{table*}[!t]
 \centering
 \caption{Procedural error classes, the metric used to measure each, and the component of Workflow GraphRAG designed to address it.}
 \label{tab:errormap}
@@ -330,10 +329,10 @@ E2 Actor mismatch & AMR (Eq.~3) & Per-step actor attribute via \texttt{PERFORMS}
 E3 Procedural cross-contamination & KFR, cross-SOP and single-SOP questions & Rule-based SOP selection (Eq.~\eqref{eq:score}) & Tables~\ref{tab:percat}, \ref{tab:selection} \\
 \bottomrule
 \end{tabularx}
-\end{table}
+\end{table*}
 
 \subsection{Corpus chunking and procedural cross-contamination}
-Documents are chunked with a 1,700-character window and a 100-character overlap. Because every SOP in Table~\ref{tab:corpus} is under 1,650 characters, each maps onto exactly one chunk ($N=7$), so top-$k$ retrieval with $k=3$ always places three complete SOPs in the prompt. Given the shared vocabulary and actors described above, the challenge in this setting is not reconstructing fragmented passages but preventing cross-contamination (E3) and preserving order and actor fidelity (E1, E2).
+Documents are chunked with a 1,700-character window and a 100-character overlap. Because every SOP in Table~\ref{tab:corpus} is under 1,650 characters, each maps onto exactly one chunk ($N=7$), so top-$k$ retrieval with $k=3$ always places three complete SOPs in the prompt. The challenge is therefore not reconstructing fragments but preventing cross-contamination (E3) and preserving order and actors (E1, E2).
 
 %% ===================================================================
 \section{Proposed method and ablation design}
@@ -342,7 +341,7 @@ Documents are chunked with a 1,700-character window and a 100-character overlap.
 \subsection{System overview}
 Process-Aware Workflow GraphRAG has an offline and an online phase (Figure~\ref{fig:arch}). Once, SOPs are curated into workflow graphs and indexed as dense vectors; per question, a rule-based scorer selects the SOP, its ordered steps are serialized, supporting chunks are retrieved, and a local generator answers.
 
-\begin{figure}[!htbp]
+\begin{figure*}[!t]
 \centering
 \resizebox{\textwidth}{!}{%
 \begin{tikzpicture}[
@@ -386,7 +385,7 @@ Process-Aware Workflow GraphRAG has an offline and an online phase (Figure~\ref{
 \end{tikzpicture}}
 \caption{Architecture of Process-Aware Workflow GraphRAG. Highlighted nodes indicate components introduced: rule-based SOP selection and ordered workflow graph extraction. The underlying vector index, embedding model, prompt template, and generator are shared across evaluated systems.}
 \label{fig:arch}
-\end{figure}
+\end{figure*}
 
 \subsection{Workflow graph construction}
 \label{sec:graph}
@@ -398,7 +397,7 @@ Each procedure $p$ is a directed graph $G_p=(V_p,E_p)$ implemented in NetworkX, 
 \end{enumerate}
 Edges are $\texttt{HAS\_STEP}(v_{\text{root}},v_i)$, $\texttt{NEXT\_STEP}(v_i,v_{i+1})$ for execution precedence, and $\texttt{PERFORMS}(v_{\text{actor}},v_i)$ for attribution. Built by hand from the 7 PDFs, the graph has 7 root, 44 step, and 15 actor nodes and 125 directed edges. A step's primary actor is the grammatical subject of its instruction; secondary signatories stay in the action description. Scripts verify that every quote matches the source verbatim and that step counts equal those of the PDFs. Figure~\ref{fig:graphs} contrasts this representation with the entity-graph baseline.
 
-\begin{figure}[!htbp]
+\begin{figure*}[!t]
 \centering
 \resizebox{\textwidth}{!}{%
 \begin{tikzpicture}[
@@ -462,7 +461,7 @@ Edges are $\texttt{HAS\_STEP}(v_{\text{root}},v_i)$, $\texttt{NEXT\_STEP}(v_i,v_
 \end{tikzpicture}}
 \caption{Graph representations compared in this study. (a) The proposed directed workflow graph for the \emph{Reactivation after leave} SOP; the full graph has 7 root, 44 step, and 15 actor nodes and 125 edges. (b) The undirected entity-graph baseline: question entities are matched against 17 curated triples, and 1-hop triples are prepended to the top-3 dense chunks.}
 \label{fig:graphs}
-\end{figure}
+\end{figure*}
 
 \subsection{Rule-based SOP selection}
 Given question $q$, the target procedure $p^\ast$ is identified with a transparent scoring function:
@@ -470,7 +469,7 @@ Given question $q$, the target procedure $p^\ast$ is identified with a transpare
 s(q,p) = 15\,\mathbb{1}[\textit{title}_p \subset q] + \sum_{a \in \textit{aliases}_p} g(q,a) + \sum_{v \in \textit{steps}_p} h(q,v),
 \label{eq:score}
 \end{equation}
-where $g(q,a)=8$ if alias $a$ occurs as an exact substring of $q$, or 2 per constituent word ($|w|>2$); and $h(q,v)=1$ if $q$ contains an explicit procedural cue (Indonesian keywords for ``how'', ``procedure'', ``requirements'', ``flow'', or ``documents'') and shares a content word ($|w|>4$) with the action of step $v$. The highest-scoring procedure is selected if $s(q,p^\ast)\geq 3$. A priority rule maps questions containing keywords for both ``active'' and ``leave'' to \emph{Reactivation after leave}, resolving confusion between those two procedures. Matching is case-insensitive; the rules are deterministic and inspectable but tailored to this 7-SOP collection.
+where $g(q,a)=8$ if alias $a$ occurs as an exact substring of $q$, or 2 per constituent word ($|w|>2$); and $h(q,v)=1$ if $q$ contains an explicit procedural cue (Indonesian keywords for ``how'', ``procedure'', ``requirements'', ``flow'', or ``documents'') and shares a content word ($|w|>4$) with the action of step $v$. The highest-scoring procedure is selected if $s(q,p^\ast)\geq 3$. A priority rule sends questions with both ``active'' and ``leave'' keywords to \emph{Reactivation after leave}. The case-insensitive rules are inspectable but tailored to this collection.
 
 \subsection{Context construction and supporting retrieval}
 For the selected $p^\ast$, step nodes are traversed along \texttt{NEXT\_STEP} edges and serialized as an ordered block of step index, actor, action, documents, outputs, and duration (Figure~\ref{fig:context}).
@@ -478,7 +477,7 @@ For the selected $p^\ast$, step nodes are traversed along \texttt{NEXT\_STEP} ed
 \begin{figure}[!htbp]
 \centering
 \small
-\fbox{\begin{minipage}{0.92\textwidth}
+\fbox{\begin{minipage}{0.92\columnwidth}
 \textbf{OFFICIAL WORKFLOW: REACTIVATION AFTER LEAVE (AKTIF KEMBALI)}\\
 Maximum processing duration: Not specified in document\\[2pt]
 \textbf{Step 1.} Actor: Mahasiswa (Student)\\
@@ -496,7 +495,7 @@ Maximum processing duration: Not specified in document\\[2pt]
 For supplementary details such as notes and URLs, the query is expanded with the SOP title and the actions of its first three steps, and $k=3$ chunks retrieved with it from the shared Chroma index are appended after the workflow block. Because each chunk is a whole SOP, these supporting chunks may contain other procedures, which we analyse in Section~\ref{sec:discussion}.
 
 \subsection{Generation and refusal mechanism}
-The context and question are inserted into a standard prompt template that instructs the model to answer in Indonesian, use only the provided facts, and abstain when evidence is insufficient; inference runs locally with \texttt{gemma4:e2b} via Ollama. Refusal is triggered deterministically before generation if (1) no SOP is selected ($s(q,p^\ast)<3$) and (2) the maximum cosine similarity between $q$ and the retrieved chunks is below $\tau=0.3$. Otherwise the query reaches the generator, which can still abstain if the context lacks the requested facts. Algorithm~\ref{alg:workflow} details the pipeline.
+A standard template instructs \texttt{gemma4:e2b} (via Ollama) to answer in Indonesian from the provided facts only and to abstain when evidence is insufficient. Refusal is triggered deterministically before generation if (1) no SOP is selected ($s(q,p^\ast)<3$) and (2) the maximum cosine similarity between $q$ and the retrieved chunks is below $\tau=0.3$. Otherwise the generator may still abstain (Algorithm~\ref{alg:workflow}).
 
 \begin{algorithm}[!htbp]
 \caption{Execution pipeline of Process-Aware Workflow GraphRAG}
@@ -519,7 +518,7 @@ The context and question are inserted into a standard prompt template that instr
 \IF{$p^\ast = \text{none}$ \AND $b < \tau$}
   \RETURN Refusal response (``Information not available in official SOPs'')
 \ENDIF
-\RETURN $\textsc{GenerateLocalLLM}(\textsc{PromptTemplate}(W \,\|\, C, q))$
+\RETURN $\textsc{Generate}(\textsc{Prompt}(W \,\|\, C, q))$
 \end{algorithmic}
 \end{algorithm}
 
@@ -527,7 +526,7 @@ The context and question are inserted into a standard prompt template that instr
 \label{sec:ablation-oracle}
 \emph{Selection-Matched Text RAG} (logged as \emph{SOP-Oracle RAG}) uses the same selection rule (Eq.~\eqref{eq:score}) and query-expanded supporting retrieval as Workflow GraphRAG but supplies the raw text chunk of $p^\ast$ instead of the serialized workflow $W$, so the two systems differ only in representation (Figure~\ref{fig:prompt}).
 
-\begin{figure}[!htbp]
+\begin{figure*}[!t]
 \centering
 \resizebox{\textwidth}{!}{%
 \begin{tikzpicture}[
@@ -581,7 +580,7 @@ The context and question are inserted into a standard prompt template that instr
 \end{tikzpicture}}
 \caption{Context supplied to the generator by the main comparison systems. Each chunk is a complete SOP, so top-3 retrieval always adds three procedures. Workflow GraphRAG and the ablation share selection and supporting chunks and differ only in how $p^\ast$ is represented. Token counts are means over all 40 questions, including the shared template.}
 \label{fig:prompt}
-\end{figure}
+\end{figure*}
 
 %% ===================================================================
 \section{Experimental setup}
@@ -591,7 +590,7 @@ The context and question are inserted into a standard prompt template that instr
 \label{sec:systems}
 We evaluate 10 configurations in three groups (Table~\ref{tab:systems}): four main systems (Naive RAG, the custom entity-graph GraphRAG, Workflow GraphRAG, and the selection-matched ablation); four supplementary RAG baselines (Hybrid RAG \cite{robertson2009bm25,cormack2009rrf}, Agentic RAG \cite{yao2023react}, Corrective RAG \cite{yan2024crag}, and Multimodal-Layout RAG); and two reference systems (LLM only, which shows parametric knowledge without retrieval, and full-context prompting, which supplies all 7 SOPs as an upper bound on available evidence).
 
-\begin{table}[!htbp]
+\begin{table*}[!t]
 \centering
 \caption{System configurations evaluated across 10 architectures. All systems share identical embedding models, chunking parameters (1,700/100 characters), vector stores, generator, and prompt templates.}
 \label{tab:systems}
@@ -602,22 +601,22 @@ System Configuration & Context Construction and Retrieval Mechanism \\
 \midrule
 \multicolumn{2}{l}{\textit{Main Comparison and Ablation}} \\
 Naive RAG & Top-3 dense chunks by cosine similarity; refuses if best similarity $< 0.3$. \\
-GraphRAG (custom entity graph) & 1-hop expansion over 17 curated relational triples; matched triples prepended to top-3 dense chunks. \\
-\textbf{Workflow GraphRAG (proposed)} & Ordered workflow steps from directed graph with explicit actors and inputs, followed by top-3 supporting chunks. \\
-\textit{Selection-Matched Text RAG (SOP-Oracle ablation)} & Identical rule-based selection, providing selected raw SOP text in place of workflow block, followed by top-3 supporting chunks. \\
+GraphRAG (custom entity graph) & 1-hop triples from 17 curated triples, prepended to top-3 dense chunks. \\
+\textbf{Workflow GraphRAG (proposed)} & Ordered workflow block of the selected SOP, then top-3 supporting chunks. \\
+\textit{Selection-Matched Text RAG (SOP-Oracle ablation)} & Same selection; raw text of the selected SOP instead of the workflow block, then top-3 supporting chunks. \\
 \midrule
 \multicolumn{2}{l}{\textit{Supplementary RAG Baselines}} \\
 Hybrid RAG & Reciprocal rank fusion of top-5 dense and top-5 BM25 chunks ($k_{\text{rrf}}=60$); top-3 retained. \\
-Agentic RAG & ReAct loop executing up to 3 iterative search queries directed by generator. \\
+Agentic RAG & ReAct loop with up to 3 search actions. \\
 Corrective RAG (CRAG) & Retrieval grading: $\geq 0.55$ retained, $0.35$--$0.55$ query rewritten, $< 0.35$ refused. \\
-Multimodal-Layout RAG & Top-3 dense chunks augmented with structural document layout tags. \\
+Multimodal-Layout RAG & Top-3 dense chunks with layout tags. \\
 \midrule
 \multicolumn{2}{l}{\textit{Reference Baselines}} \\
 LLM Only & Zero-shot generation without retrieved context. \\
-Full-Context Prompting & All 7 SOP documents provided directly in generator prompt ($\approx$1,100 words). \\
+Full-Context Prompting & All 7 SOPs in the prompt ($\approx$1,100 words). \\
 \bottomrule
 \end{tabularx}
-\end{table}
+\end{table*}
 
 \subsection{Custom entity-graph baseline scope and validity threat}
 The entity-graph baseline is our own implementation with 17 curated triples (Supplementary Material, S2), not Microsoft GraphRAG \cite{edge2024graphrag}, LightRAG \cite{guo2024lightrag}, or HippoRAG \cite{gutierrez2024hipporag}. It represents basic entity-triple augmentation rather than published GraphRAG frameworks (Section~\ref{sec:discussion}).
@@ -640,7 +639,7 @@ The held-out benchmark has 40 questions drafted from the SOPs (Table~\ref{tab:be
 \label{tab:bench}
 \small
 \setlength{\tabcolsep}{4pt}
-\begin{tabularx}{\textwidth}{lr>{\raggedright\arraybackslash}X}
+\begin{tabularx}{\columnwidth}{lr>{\raggedright\arraybackslash}X}
 \toprule
 Category & $n$ & Operational Target \\
 \midrule
@@ -659,9 +658,9 @@ Total & 40 & \\
 \subsection{Evaluation metrics}
 All primary metrics are computed deterministically, without LLM judges:
 \begin{itemize}[leftmargin=*]
-\item \textbf{Key-Fact Recall (KFR):} share of required reference facts detected in the response, over the 35 answerable questions.
-\item \textbf{ROUGE-1, ROUGE-2, ROUGE-L:} n-gram and longest-common-subsequence overlap with the reference answer \cite{lin2004rouge}.
-\item \textbf{Step Coverage:} on the 11 procedural questions, the share of gold steps $S$ detected in the response ($|D|/|S|$); a step counts as detected when at least two of its keyword groups match.
+\item \textbf{Key-Fact Recall (KFR):} share of required key facts found in the response (35 answerable questions).
+\item \textbf{ROUGE-1/2/L:} overlap with the reference answer \cite{lin2004rouge}.
+\item \textbf{Step Coverage:} share of gold steps $S$ detected ($|D|/|S|$) on the 11 procedural questions; detection requires two matching keyword groups.
 \item \textbf{Topological Inversion Rate (TIR):} share of detected step pairs $(v_i,v_j)$ with $i<j$ that appear in reversed order:
 \begin{equation}
 \text{TIR} = \frac{\bigl|\{(v_i,v_j) \in D^2 : i<j,\ \textit{pos}(v_i) > \textit{pos}(v_j)\}\bigr|}{\bigl|\{(v_i,v_j) \in D^2 : i<j,\ \textit{pos}(v_i) \neq \textit{pos}(v_j)\}\bigr|},
@@ -671,8 +670,8 @@ defined only when at least two comparable steps are detected.
 \begin{equation}
 \text{AMR} = \frac{\textit{mismatch}}{\textit{correct} + \textit{mismatch}}.
 \end{equation}
-\item \textbf{Refusal accuracy and false refusal rate:} the share of the 5 unanswerable questions correctly refused, and the share of the 35 answerable questions incorrectly refused.
-\item \textbf{Resource costs:} prompt tokens, completion tokens, LLM invocations, and latency per question, averaged over all 40 items.
+\item \textbf{Refusal accuracy / false refusal rate:} share of the 5 unanswerable questions refused / of the 35 answerable questions refused.
+\item \textbf{Resource costs:} tokens, LLM calls, and latency per question (all 40 items).
 \end{itemize}
 
 \subsection{Manual audit of deterministic step scorer}
@@ -704,7 +703,7 @@ All results come from the run on the \nVerified{} verified benchmark items (\url
 \subsection{Procedural answer quality and order preservation (RQ1)}
 Table~\ref{tab:results} reports all 10 systems. Workflow GraphRAG, Selection-Matched Text RAG, and full-context prompting reach the highest key-fact recall (0.955, 0.962, and 0.962), against 0.712 for Naive RAG and 0.698 for the entity-graph baseline; Workflow GraphRAG also reaches 1.000 step coverage (0.727 and 0.687). Confidence intervals are given in the Supplementary Material (S1).
 
-\begin{table}[!htbp]
+\begin{table*}[!t]
 \centering
 \caption{Summary of evaluation results across ten system configurations. KFR and false refusal: 35 answerable questions; Coverage, TIR, and AMR: 11 procedural questions; refusal accuracy: 5 unanswerable questions; prompt tokens: all 40. Point estimates; confidence intervals are in the Supplementary Material (S1).}
 \label{tab:results}
@@ -712,15 +711,15 @@ Table~\ref{tab:results} reports all 10 systems. Workflow GraphRAG, Selection-Mat
 \setlength{\tabcolsep}{2pt}
 \resizebox{\textwidth}{!}{%
 \input{paper_tables/main_results.tex}}
-\end{table}
+\end{table*}
 
 Against GraphRAG, Workflow GraphRAG improves key-fact recall by $+0.257$ [0.133, 0.395] (Holm-adjusted $p=0.034$) and ROUGE-L by $+0.077$ [0.031, 0.127] (Holm-adjusted $p=0.038$); the step-coverage difference is not significant after adjustment ($p=0.438$). Against Naive RAG, the recall gain of $+0.243$ [0.114, 0.381] has a Holm-adjusted $p=0.053$ and therefore does not reach significance at $\alpha=0.05$, although the unadjusted interval excludes zero; with $n=40$, statistical power is limited.
 
 On detected steps, TIR is 0.000 for Workflow GraphRAG, Naive RAG, Selection-Matched Text RAG, and the supplementary baselines, but 0.083 for the entity-graph baseline, 0.027 for full-context prompting, and 0.333 for LLM only; AMR is 0.000 for every retrieval-augmented system and 0.444 for LLM only. Both metrics are conditional on detection, so systems differ mainly in completeness rather than in reordering.
 
-By category (Table~\ref{tab:percat}), Workflow GraphRAG reaches 1.000 key-fact recall on procedural questions (0.727 for both baselines) and 0.889 on cross-SOP questions (0.611). In cross-SOP questions about signatories in different procedures, its explicit step outputs allow unambiguous attribution, mitigating error E3.
+By category (Table~\ref{tab:percat}), Workflow GraphRAG reaches 1.000 key-fact recall on procedural questions (0.727 for both baselines) and 0.889 on cross-SOP questions (0.611). Explicit step outputs let it attribute signatories across procedures, mitigating E3.
 
-\begin{table}[!htbp]
+\begin{table*}[!t]
 \centering
 \caption{Key-fact recall by question category for the primary comparison systems on \nVerified{} verified questions. Procedural category also includes step coverage.}
 \label{tab:percat}
@@ -728,7 +727,7 @@ By category (Table~\ref{tab:percat}), Workflow GraphRAG reaches 1.000 key-fact r
 \setlength{\tabcolsep}{4pt}
 \resizebox{\textwidth}{!}{%
 \input{paper_tables/per_category.tex}}
-\end{table}
+\end{table*}
 
 \subsection{Selection versus structuring ablation (RQ2)}
 \label{sec:ablation-results}
@@ -736,9 +735,10 @@ Workflow GraphRAG (0.955 KFR) and Selection-Matched Text RAG (0.962 KFR) differ 
 
 \begin{figure}[!htbp]
 \centering
+\resizebox{\columnwidth}{!}{%
 \begin{tikzpicture}
 \begin{axis}[
-  width=0.66\textwidth, height=5.0cm,
+  width=0.66\columnwidth, height=5.0cm,
   xmin=-0.12, xmax=0.47, ymin=0.4, ymax=4.6,
   ytick={1,2,3,4},
   yticklabels={
@@ -773,16 +773,16 @@ Workflow GraphRAG (0.955 KFR) and Selection-Matched Text RAG (0.962 KFR) differ 
 \node[font=\scriptsize, anchor=west] at (axis cs:0.405,3) {$p_{\mathrm{Holm}}=0.034$};
 \node[font=\scriptsize, anchor=west] at (axis cs:0.405,2) {$p_{\mathrm{Holm}}=0.053$};
 \end{axis}
-\end{tikzpicture}
+\end{tikzpicture}}
 \caption{Paired differences in key-fact recall on the 35 answerable questions, with 95\% bootstrap intervals and Wilcoxon $p$-values (Holm-adjusted within each reference family). With selection held fixed, the difference is near zero.}
 \label{fig:forest}
 \end{figure}
 
-The step-coverage gap (1.000 vs.\ 0.975) comes from a single item (UKT-P1): as in Section~\ref{sec:audit}, the ablation put actors and actions on separate markdown lines, so the line-based scorer missed step co-occurrence although all 11 steps were present.
+The step-coverage gap (1.000 vs.\ 0.975) comes from one item (UKT-P1), where the ablation split actors and actions across lines and the scorer missed steps that were present (Section~\ref{sec:audit}).
 
-Table~\ref{tab:selection} reports the selector outcome on all 40 questions. All 32 answerable single-SOP questions were routed to the correct procedure, no question was misrouted between procedures, and for each cross-SOP question the selector chose one of the procedures involved. Ragas scores point in the same direction: \texttt{llama3.1:8b} rates Workflow GraphRAG at 0.805 faithfulness and 0.682 relevancy, compared with 0.762/0.549 for Naive RAG and 0.743/0.537 for GraphRAG.
+The selector routed all 32 answerable single-SOP questions correctly and misrouted none (Table~\ref{tab:selection}); for each cross-SOP question it chose one of the procedures involved. Ragas scores agree: faithfulness/relevancy are 0.805/0.682 for Workflow GraphRAG, 0.762/0.549 for Naive RAG, and 0.743/0.537 for GraphRAG.
 
-\begin{table}[!htbp]
+\begin{table*}[!t]
 \centering
 \caption{Outcome of the rule-based SOP selector (Eq.~\eqref{eq:score}) for Workflow GraphRAG on all 40 benchmark questions, read from the \texttt{matched\_sop} field of the run log.}
 \label{tab:selection}
@@ -800,7 +800,7 @@ Unanswerable, no match (NA-4, NA-5) & 2 & No SOP reaches $s \geq 3$ & Determinis
 Total & 40 & No misrouting between procedures & \\
 \bottomrule
 \end{tabularx}
-\end{table}
+\end{table*}
 
 \subsection{Refusal and boundary handling (RQ3)}
 Workflow GraphRAG, Selection-Matched Text RAG, and full-context prompting refuse all 5 unanswerable questions with no false refusals (Table~\ref{tab:results}). LLM only never abstains (0.000 refusal accuracy; the 0.333 in earlier drafts was a column transposition of its TIR), and Corrective RAG also refuses 13 of 35 answerable questions (false refusal rate 0.371) because of its threshold ($\tau=0.35$).
@@ -810,9 +810,9 @@ The 0.600 refusal accuracy of Naive RAG, GraphRAG, Hybrid, Agentic, and Multimod
 Workflow GraphRAG refused NA-4 and NA-5 before inference (no SOP scored 3; similarity below 0.3). For NA-1 to NA-3 a topical SOP was selected and the generator stated that the requested fee or GPA criteria are not in the SOP, so questions that mention SOP keywords still reach the generator: an operational boundary, not a general check of evidence sufficiency.
 
 \subsection{Computational efficiency and resource trade-offs (RQ4)}
-Table~\ref{tab:cost} summarises efficiency. Workflow GraphRAG uses 1,525 prompt tokens per query, more than Naive RAG (916) and GraphRAG (949) because it adds the workflow block, but 44\% fewer than full-context prompting (2,722; about 56\% of its volume) at numerically close recall (0.955 vs.\ 0.962). Figure~\ref{fig:tradeoff} plots this trade-off for all systems.
+Workflow GraphRAG uses 1,525 prompt tokens per query (Table~\ref{tab:cost}), more than Naive RAG (916) and GraphRAG (949) because of the workflow block, but 44\% fewer than full-context prompting (2,722) at close recall (0.955 vs.\ 0.962; Figure~\ref{fig:tradeoff}).
 
-\begin{figure}[!htbp]
+\begin{figure*}[!t]
 \centering
 \begin{tikzpicture}
 \begin{axis}[
@@ -865,7 +865,7 @@ coordinates {(1479,0.962) += (0,0.038) -= (0,0.048)};
 \end{tikzpicture}
 \caption{Key-fact recall against mean prompt tokens for all evaluated systems. Error bars: 95\% bootstrap intervals. Circles: chunk-retrieval baselines; triangles: reference systems; squares: systems with rule-based SOP selection.}
 \label{fig:tradeoff}
-\end{figure}
+\end{figure*}
 
 \begin{table}[!htbp]
 \centering
@@ -873,7 +873,7 @@ coordinates {(1479,0.962) += (0,0.038) -= (0,0.048)};
 \label{tab:cost}
 \small
 \setlength{\tabcolsep}{4pt}
-\resizebox{\textwidth}{!}{%
+\resizebox{\columnwidth}{!}{%
 \input{paper_tables/cost.tex}}
 \end{table}
 
@@ -885,9 +885,10 @@ With the non-fine-tuned base \texttt{all-indo-e5-small-v4} model (Figure~\ref{fi
 
 \begin{figure}[!htbp]
 \centering
+\resizebox{\columnwidth}{!}{%
 \begin{tikzpicture}
 \pgfplotsset{abl/.style={
-  width=0.42\textwidth, height=5.2cm,
+  width=0.42\columnwidth, height=5.2cm,
   xmin=-0.3, xmax=1.3, ymin=0.6, ymax=1.03,
   xtick={0,1}, xticklabels={Fine-tuned (v3), Base},
   ticklabel style={font=\scriptsize}, title style={font=\scriptsize\bfseries},
@@ -905,7 +906,7 @@ With the non-fine-tuned base \texttt{all-indo-e5-small-v4} model (Figure~\ref{fi
 \addplot[blue!70!black, thick, mark=square*, mark size=2pt] coordinates {(0,1.000) (1,1.000)};
 \legend{Naive RAG, GraphRAG (entity), Workflow GraphRAG}
 \end{axis}
-\end{tikzpicture}
+\end{tikzpicture}}
 \caption{Embedding sensitivity: key-fact recall and step coverage with the fine-tuned (v3) and the non-fine-tuned base \texttt{all-indo-e5-small-v4} embedding. Chunk-retrieval baselines improve markedly with the base model, whereas Workflow GraphRAG is unchanged.}
 \label{fig:embedding}
 \end{figure}
@@ -952,8 +953,7 @@ This research did not receive any specific grant from funding agencies in the pu
 \section*{Data and code availability}
 Code, benchmark, and evaluation scripts are available at \url{https://github.com/reon01425-glitch/Chatbot-RAG-Comparison}, branch \url{exp/full-run-v1}. Experimental logs are deposited in \url{results/full_v3_20261008/} (main run) and \url{results/full_base_20261008/} (embedding ablation). The repository includes the 7 source SOP documents redistributed under institutional permission.
 
-\section*{CRediT authorship contribution statement}
-\textbf{Cipta Fikri Wiratama}: Conceptualization, Methodology, Software, Data curation, Validation, Investigation, Writing -- original draft. \textbf{Indra Waspada}: Conceptualization, Supervision, Writing -- review \& editing. \textbf{Dhena Kamalia Fu'adi}: Data curation, Validation, Writing -- review \& editing. \textbf{Ramona Ramli}: Conceptualization, Methodology, Supervision, Writing -- review \& editing. \textbf{Henri Tantyoko}: Methodology, Validation, Writing -- review \& editing. \textbf{Sandy Kurniawan}: Supervision, Methodology, Writing -- review \& editing. \textbf{Satriawan Rasyid Purnama}: Validation, Formal analysis, Writing -- review \& editing.
+\printcredits
 
 \section*{Ethics statement}
 This study did not involve human participants, personal data, or animals. The benchmark questions and reference answers were written by the authors, and the SOP documents were used with the permission of the Faculty of Science and Mathematics, Universitas Diponegoro.

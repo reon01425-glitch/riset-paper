@@ -1,0 +1,5 @@
+[submodule "code"]
+	path = code
+	url = https://github.com/reon01425-glitch/Chatbot-RAG-Comparison
+	branch = exp/full-run-v1
+	shallow = true

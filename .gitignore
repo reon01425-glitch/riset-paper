@@ -9,3 +9,4 @@
 work/
 measure_*/
 .DS_Store
+tools/docx/out/
