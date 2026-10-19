@@ -1,0 +1,6 @@
+Highlights
+- Evaluates procedure selection vs. workflow structuring in local RAG.
+- Controlled ablation isolates document selection from graph serialization.
+- No detected factual accuracy gain from graph structuring over raw text (p = 0.59).
+- Workflow graphs prevent step-order inversions on local edge generators.
+- Achieves 0.955 recall with 44% prompt-token reduction vs. full context.

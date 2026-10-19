@@ -1,0 +1,72 @@
+\documentclass[10pt]{article}
+\usepackage[margin=2.2cm,landscape]{geometry}
+\input{glyphtounicode}\pdfgentounicode=1
+\usepackage[T1]{fontenc}\usepackage{lmodern}
+\usepackage{amsmath,amssymb,booktabs,tabularx,array,graphicx}
+\renewcommand{\thetable}{S\arabic{table}}
+\newcommand{\nVerified}{40}
+\title{Supplementary material\\[4pt]\large Procedure Selection versus Workflow Structuring in Local RAG for Institutional SOP Question Answering: An Ablation Study}
+\date{}
+\begin{document}
+\maketitle
+\begin{table}[!htbp]
+\centering
+\caption{Complete evaluation results across all 10 systems on \nVerified{} verified benchmark questions, reporting mean [95\% bootstrap confidence intervals].}
+\label{tab:results-full}
+\scriptsize
+\setlength{\tabcolsep}{2pt}
+\resizebox{\textwidth}{!}{%
+\input{paper_tables/main_results_full.tex}}
+\end{table}
+
+\begin{table}[!htbp]
+\centering
+\caption{The 17 hand-curated relational triples of the custom entity-graph GraphRAG baseline, as defined in \texttt{src/engine.py}. Entities and relations are kept in their original Indonesian form.}
+\label{tab:triples}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{rlll}
+\toprule
+\# & Head entity & Tail entity & Relation \\
+\midrule
+1 & cuti akademik & izin cuti & prosedur pengajuan \\
+2 & cuti akademik & aktif kembali & alur lanjutan \\
+3 & cuti akademik & ketua program studi & rekomendasi \& persetujuan \\
+4 & cuti akademik & dekan & penerbitan SK izin \\
+5 & cuti akademik & spp/ukt & syarat bebas tunggakan \\
+6 & legalisir & ijazah & dokumen objek \\
+7 & legalisir & transkrip & dokumen objek \\
+8 & legalisir & subbagian akademik & verifikasi \& validasi \\
+9 & beasiswa & rekomendasi beasiswa & dokumen pengajuan \\
+10 & beasiswa & wakil dekan i & pengesahan surat \\
+11 & ukt & keterlambatan pembayaran & permohonan dispensasi \\
+12 & ukt & bagian keuangan fsm & verifikasi pembayaran \\
+13 & irs & pengisian irs & registrasi akademik per semester \\
+14 & irs & dosen wali & bimbingan \& persetujuan online \\
+15 & irs & siap undip & portal sistem informasi \\
+16 & organisasi mahasiswa & proposal kegiatan & pengajuan persetujuan \\
+17 & organisasi mahasiswa & wakil dekan i & persetujuan kegiatan \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[!htbp]
+\centering
+\caption{One benchmark question per category from \texttt{sop\_benchmark\_v1.json}, with English glosses.}
+\label{tab:examples}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{l l >{\raggedright\arraybackslash}X}
+\toprule
+ID & Category & Question (Indonesian) / English gloss \\
+\midrule
+CUTI-P1 & Procedural & \textit{Apa saja tahapan mengajukan cuti akademik di FSM dari awal sampai surat izin keluar, dan siapa yang mengerjakan tiap tahap?} \newline What are the steps for applying for academic leave at FSM, from the start until the permit letter is issued, and who performs each step? \\
+CUTI-A1 & Actor & \textit{Setelah form cuti saya ditandatangani Kaprodi, form itu diserahkan ke siapa dan diproses oleh bagian apa?} \newline After the Head of Study Programme signs my leave form, to whom is it submitted and which unit processes it? \\
+CUTI-D1 & Documents & \textit{Dokumen apa saja yang harus dilampirkan saat mengajukan cuti akademik?} \newline Which documents must be attached when applying for academic leave? \\
+CUTI-T1 & Time/location & \textit{Berapa lama maksimal proses izin cuti akademik, dan di mana saya mengambil Surat Izin Dekan?} \newline What is the maximum processing time for an academic leave permit, and where do I collect the Dean's permit letter? \\
+X-1 & Cross-SOP & \textit{Apa perbedaan dokumen yang dibawa untuk mengajukan cuti akademik dengan untuk aktif kembali setelah cuti?} \newline How do the documents required for academic leave differ from those required for reactivation after leave? \\
+NA-1 & Unanswerable & \textit{Berapa biaya legalisir ijazah per lembar di FSM?} \newline How much does diploma legalisation cost per sheet at FSM? \\
+\bottomrule
+\end{tabularx}
+\end{table}
+\end{document}
