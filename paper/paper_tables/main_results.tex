@@ -1,0 +1,18 @@
+\begin{tabular}{lccccccc}
+\toprule
+System & KFR $\uparrow$ & Coverage $\uparrow$ & TIR $\downarrow$ & AMR $\downarrow$ & Refusal acc. $\uparrow$ & False ref. $\downarrow$ & Prompt tok. \\
+\midrule
+Naive RAG & 0.712 & 0.727 & 0.000 & 0.000 & 0.600 & 0.000 & 916 \\
+GraphRAG (entity) & 0.698 & 0.687 & 0.083 & 0.000 & 0.600 & 0.000 & 949 \\
+\textbf{Workflow GraphRAG} & 0.955 & 1.000 & 0.000 & 0.000 & 1.000 & 0.000 & 1525 \\
+\textit{Selection-Matched Text RAG (ablation)} & 0.962 & 0.975 & 0.000 & 0.000 & 1.000 & 0.000 & 1479 \\
+\midrule
+Hybrid RAG & 0.683 & 0.712 & 0.000 & 0.000 & 0.600 & 0.000 & 882 \\
+Agentic RAG & 0.712 & 0.702 & 0.000 & 0.000 & 0.600 & 0.000 & 1815 \\
+Corrective RAG & 0.569 & 0.636 & 0.000 & 0.000 & 1.000 & 0.371 & 725 \\
+Multimodal-layout RAG & 0.702 & 0.702 & 0.000 & 0.000 & 0.600 & 0.000 & 994 \\
+\midrule
+LLM only & 0.113 & 0.105 & 0.333 & 0.444 & 0.000 & 0.000 & 107 \\
+Full context & 0.962 & 0.944 & 0.027 & 0.000 & 1.000 & 0.000 & 2722 \\
+\bottomrule
+\end{tabular}

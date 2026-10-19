@@ -1,0 +1,11 @@
+*.aux
+*.log
+*.out
+*.spl
+*.toc
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+work/
+measure_*/
+.DS_Store
