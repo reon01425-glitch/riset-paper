@@ -3,7 +3,7 @@
 ## 1. Siapkan repo (sekali saja)
 
 ```bash
-git clone --recurse-submodules <url-repo-ini> && cd <repo>
+git clone --recurse-submodules https://github.com/reon01425-glitch/riset-paper && cd riset-paper
 # kebutuhan: MacTeX (pdflatex + lmodern), poppler (pdftotext, pdffonts), pandoc (untuk .docx)
 brew install poppler pandoc
 python3 .claude/skills/paper-densify/scripts/measure.py paper/paper_v9_0_cas_dc.tex

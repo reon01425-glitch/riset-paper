@@ -47,7 +47,7 @@ See [CHANGELOG.md](CHANGELOG.md).
 Requires TeX Live or MacTeX (pdflatex, lmodern, stix), and for Word also pandoc 3 and Python 3.
 
 ```bash
-git clone --recurse-submodules <this repo>
+git clone --recurse-submodules https://github.com/reon01425-glitch/riset-paper
 tools/cas/make_cas.sh                                # CAS PDFs from paper/paper_v9_0_elsarticle.tex
 tools/docx/make_docx.sh builds/v9.1/paper_v9_1.docx  # Word version
 ```
