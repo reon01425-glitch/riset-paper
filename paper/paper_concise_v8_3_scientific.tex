@@ -12,6 +12,10 @@
 \usepackage{algorithmic}
 \usepackage{tikz}
 \usetikzlibrary{positioning,arrows.meta,fit,backgrounds}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\newif\ifshoworacle
+\showoracletrue % set \showoraclefalse to hide Selection-Matched values in the new figures
 \usepackage[hidelinks]{hyperref}
 
 % Document formatting adjustments for academic readability and clean float placement
@@ -203,6 +207,24 @@ A satisfactory administrative answer must fulfill strict correctness criteria: i
 \item \textbf{E2 (Actor Mismatch):} The response assigns a procedural task to an incorrect official or office (e.g., claiming the Dean reviews application attachments when verification is executed by Academic Sub-division staff).
 \item \textbf{E3 (Procedural Cross-Contamination):} The response incorporates procedural steps or prerequisites from an irrelevant SOP into the requested workflow (e.g., introducing tuition settlement steps into an academic leave inquiry).
 \end{itemize}
+Table~\ref{tab:errormap} maps each error class to the metric that measures it and to the design component intended to address it.
+
+\begin{table}[!htbp]
+\centering
+\caption{Procedural error classes, the metric used to measure each, and the component of Workflow GraphRAG designed to address it.}
+\label{tab:errormap}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.2cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{3.0cm} >{\raggedright\arraybackslash}p{2.0cm}}
+\toprule
+Error class & Measured by & Design component & Reported in \\
+\midrule
+E1 Step order inversion & TIR (Eq.~2); step coverage & \texttt{NEXT\_STEP} traversal and ordered serialization & Table~\ref{tab:results} \\
+E2 Actor mismatch & AMR (Eq.~3) & Per-step actor attribute via \texttt{PERFORMS} & Table~\ref{tab:results}; Section~\ref{sec:audit} \\
+E3 Procedural cross-contamination & KFR, cross-SOP and single-SOP questions & Rule-based SOP selection (Eq.~\eqref{eq:score}) & Tables~\ref{tab:percat}, \ref{tab:selection} \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 \subsection{Corpus chunking and procedural cross-contamination}
 Under standard RAG implementations, text documents are partitioned into fixed token or character windows. In our experimental framework, documents are chunked with a window of 1,700 characters and an overlap of 100 characters. Because each SOP in Table~\ref{tab:corpus} is under 1,650 characters, each document maps onto exactly one chunk in the vector index ($N = 7$).
@@ -278,7 +300,73 @@ Edges $E_p$ capture three relationship types:
 \item $\texttt{PERFORMS}(v_{\text{actor}}, v_i)$: Attributes operational execution of step $v_i$ to a specific actor node.
 \end{itemize}
 
-The workflow graph was constructed by hand from the 7 official PDFs, producing 7 root nodes, 44 step nodes, and 15 actor nodes connected by 125 directed edges. Steps were defined such that the primary actor corresponds to the operational performing entity (the grammatical subject of the procedural instruction), whereas consulted or secondary signatories are recorded within the action description. Automated verification scripts verified that every step quote matches the source text verbatim and that step counts align exactly with source PDFs.
+The workflow graph was constructed by hand from the 7 official PDFs, producing 7 root nodes, 44 step nodes, and 15 actor nodes connected by 125 directed edges. Steps were defined such that the primary actor corresponds to the operational performing entity (the grammatical subject of the procedural instruction), whereas consulted or secondary signatories are recorded within the action description. Automated verification scripts verified that every step quote matches the source text verbatim and that step counts align exactly with source PDFs. Figure~\ref{fig:graphs} contrasts this representation with the entity-graph baseline.
+
+\begin{figure}[!htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  box/.style={execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000}, draw, rounded corners=2pt, align=center, font=\scriptsize, minimum height=9mm, text width=21mm, fill=white},
+  new/.style={box, draw=blue!70!black, fill=blue!6, thick},
+  pill/.style={draw, rounded corners=3.5mm, align=center, font=\scriptsize, minimum height=7mm, inner xsep=2mm, fill=gray!12},
+  ghost/.style={draw=gray!60, dashed, rounded corners=2pt, align=center, font=\scriptsize, text=gray!70!black, minimum height=7mm, text width=17mm},
+  arr/.style={-{Stealth[length=2mm]}, thick},
+  next/.style={-{Stealth[length=2.2mm]}, very thick, blue!70!black},
+  has/.style={-{Stealth[length=1.8mm]}, gray!70!black, dashed},
+  perf/.style={-{Stealth[length=1.8mm]}, densely dotted, thick},
+  rel/.style={thick},
+  lane/.style={draw=gray!50, rounded corners=4pt, fill=gray!6, inner sep=2.5mm}
+]
+% ===================== (a) Workflow graph (proposed) =====================
+\node[new, text width=52mm] (root) at (2.9,0)
+  {\textbf{Root} $v_{\text{root}}$: Reactivation after leave\\[-1pt]{\tiny title $\cdot$ aliases $\cdot$ max.\ duration}};
+\node[new] (s1) at (0,-1.9)   {$v_1$: Submit leave\\letter + KTM copy};
+\node[new] (s2) at (2.9,-1.9) {$v_2$: Register\\online via SSO};
+\node[new] (s3) at (5.8,-1.9) {$v_3$: Recorded\\as active student};
+\draw[has] (root.south) ++(-1.8,0) -- (s1.north);
+\draw[has] (root.south) -- (s2.north);
+\draw[has] (root.south) ++(1.8,0) -- (s3.north);
+\draw[next] (s1) -- (s2);
+\draw[next] (s2) -- (s3);
+\node[pill] (act) at (2.9,-3.55) {$v_{\text{actor}}$: Mahasiswa (Student)};
+\draw[perf] (act.north west) ++(0.25,0) -- (s1.south);
+\draw[perf] (act.north) -- (s2.south);
+\draw[perf] (act.north east) ++(-0.25,0) -- (s3.south);
+\node[ghost] (oth) at (6.7,-3.55) {steps of\\other SOPs};
+\draw[perf, gray!70!black] (act.east) -- (oth.west);
+\node[draw, rounded corners=2pt, fill=white, font=\scriptsize, align=left, execute at begin node={\hyphenpenalty=10000}, text width=74mm] (attr) at (3.1,-4.85)
+  {\textbf{Step node $v_i$ attributes:} performing actor, action, required input documents, outputs, duration, verbatim PDF quote};
+% ===================== (b) Entity-graph baseline =====================
+\node[box] (q) at (12.0,0) {Question};
+\node[pill, fill=gray!25, font=\scriptsize\bfseries] (ent) at (12.0,-1.55) {``cuti akademik''};
+\draw[arr] (q) -- node[right, font=\tiny]{entity keyword match} (ent);
+\node[pill] (n1) at (10.4,-3.0)  {``dekan''};
+\node[pill] (n2) at (12.0,-3.0) {\dots};
+\node[pill] (n3) at (13.6,-3.0) {\dots};
+\draw[rel] (ent) -- node[above left, pos=0.55, font=\tiny, align=right, inner sep=1pt, xshift=-1mm]{penerbitan\\SK izin} (n1);
+\draw[rel] (ent) -- (n2);
+\draw[rel] (ent) -- (n3);
+\node[draw, dashed, rounded corners=3pt, fit=(n1)(n3), inner sep=1.5mm,
+      label={[font=\tiny, anchor=north east, inner sep=1pt]south east:1-hop neighbours}] (hop) {};
+\node[box, text width=40mm] (pr) at (12.0,-4.85) {Prompt: matched triples $(h,r,t)$\\+ top-3 dense chunks};
+\draw[arr] (pr.north |- hop.south) -- (pr.north);
+% ===================== Panels and legend =====================
+\begin{scope}[on background layer]
+\node[lane, fit=(root)(s1)(s3)(act)(oth)(attr)] (pa) {};
+\node[lane, fit=(q)(n1)(n3)(hop)(pr), inner xsep=4mm] (pb) {};
+\end{scope}
+\node[font=\scriptsize\bfseries, anchor=south west] at (pa.north west) {(a) Workflow graph (proposed): directed};
+\node[font=\scriptsize\bfseries, anchor=south west] at (pb.north west) {(b) Entity-graph baseline: undirected};
+\begin{scope}[yshift=-6.25cm, font=\scriptsize]
+\draw[next] (-0.9,0) -- (-0.2,0); \node[anchor=west] at (-0.1,0) {\texttt{NEXT\_STEP}};
+\draw[has]  (1.8,0) -- (2.5,0);   \node[anchor=west] at (2.6,0)  {\texttt{HAS\_STEP}};
+\draw[perf] (4.4,0) -- (5.1,0);   \node[anchor=west] at (5.2,0)  {\texttt{PERFORMS}};
+\draw[rel]  (9.8,0) -- (10.5,0);   \node[anchor=west] at (10.6,0)  {curated relation (\texttt{nx.Graph})};
+\end{scope}
+\end{tikzpicture}}
+\caption{Graph representations compared in this study. (a) The proposed workflow graph, shown for the \emph{Reactivation after leave} SOP: the root node links to each step via \texttt{HAS\_STEP}, \texttt{NEXT\_STEP} edges encode execution order, and \texttt{PERFORMS} edges attribute each step to an actor node shared across procedures. The full graph contains 7 root, 44 step, and 15 actor nodes connected by 125 directed edges. (b) The custom entity-graph baseline: question entities are matched against 17 curated relational triples in an undirected graph, and the 1-hop triples are prepended to the top-3 dense chunks.}
+\label{fig:graphs}
+\end{figure}
 
 \subsection{Rule-based SOP selection}
 Given user question $q$, the system identifies the target procedure $p^\ast$ using a transparent heuristic scoring function:
@@ -351,7 +439,63 @@ Refusal operates through a combination of deterministic pre-generation filtering
 \label{sec:ablation-oracle}
 A central methodological question is whether observed performance gains stem from explicit workflow graph structuring or from procedure selection. To isolate these factors, we implement \emph{Selection-Matched Text RAG} (designated in experimental benchmark logs as \emph{SOP-Oracle RAG}).
 
-This ablation shares the identical SOP selection rule (Eq.~\eqref{eq:score}) and query-expanded supporting chunk retrieval as Workflow GraphRAG. However, instead of serializing the workflow graph $W$, it retrieves the raw, unedited text chunk of the selected SOP $p^\ast$ from the document store. Thus, both systems receive the identical procedure and supporting chunks, differing solely in representation: structured workflow block vs.\ original unstructured prose.
+This ablation shares the identical SOP selection rule (Eq.~\eqref{eq:score}) and query-expanded supporting chunk retrieval as Workflow GraphRAG. However, instead of serializing the workflow graph $W$, it retrieves the raw, unedited text chunk of the selected SOP $p^\ast$ from the document store. Thus, both systems receive the identical procedure and supporting chunks, differing solely in representation: structured workflow block vs.\ original unstructured prose. Figure~\ref{fig:prompt} shows the resulting context supplied to each main comparison system.
+
+\begin{figure}[!htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  lab/.style={anchor=east, font=\scriptsize, align=right, text width=30mm},
+  blk/.style={draw, rounded corners=1.5pt, font=\tiny, align=center, minimum height=6.5mm, minimum width=11mm, inner sep=1pt, fill=white},
+  q/.style={blk, minimum width=6mm, fill=gray!15},
+  sel/.style={blk, draw=blue!70!black, fill=blue!6, thick, minimum width=23mm},
+  trip/.style={blk, fill=gray!30, minimum width=11mm},
+  tok/.style={anchor=west, font=\scriptsize}
+]
+\def\dx{1.2}
+% header
+\node[font=\scriptsize\bfseries, anchor=east] at (-0.15,0.65) {System};
+\node[font=\scriptsize\bfseries, anchor=west] at (0,0.65) {Context passed to the generator (in prompt order)};
+\node[font=\scriptsize\bfseries, anchor=west] at (10.2,0.65) {Mean prompt tokens};
+% LLM only
+\node[lab] at (-0.15,0) {LLM only};
+\node[q] at (0.3,0) {$q$};
+\node[font=\tiny, anchor=west, text=gray!70!black] at (0.75,0) {no retrieved context};
+\node[tok] at (10.2,0) {107};
+% Naive
+\node[lab] at (-0.15,-0.9) {Naive RAG};
+\node[q] at (0.3,-0.9) {$q$};
+\foreach \i in {1,2,3} \node[blk] at (0.75+\i*\dx-0.6,-0.9) {chunk\,=\\SOP};
+\node[tok] at (10.2,-0.9) {916};
+% Entity graph
+\node[lab] at (-0.15,-1.8) {GraphRAG (entity)};
+\node[q] at (0.3,-1.8) {$q$};
+\node[trip] at (1.35,-1.8) {1-hop\\triples};
+\foreach \i in {1,2,3} \node[blk] at (1.95+\i*\dx-0.6,-1.8) {chunk\,=\\SOP};
+\node[tok] at (10.2,-1.8) {949};
+% Workflow
+\node[lab] at (-0.15,-2.7) {\textbf{Workflow GraphRAG}};
+\node[q] at (0.3,-2.7) {$q$};
+\node[sel] at (1.95,-2.7) {workflow block\\of selected $p^\ast$};
+\foreach \i in {1,2,3} \node[blk] at (3.15+\i*\dx-0.6,-2.7) {chunk\,=\\SOP};
+\node[tok] at (10.2,-2.7) {1,525};
+% Selection-matched
+\ifshoworacle
+\node[lab] at (-0.15,-3.6) {Selection-Matched Text (ablation)};
+\node[q] at (0.3,-3.6) {$q$};
+\node[sel, thin, fill=blue!3] at (1.95,-3.6) {raw PDF text\\of selected $p^\ast$};
+\foreach \i in {1,2,3} \node[blk] at (3.15+\i*\dx-0.6,-3.6) {chunk\,=\\SOP};
+\node[tok] at (10.2,-3.6) {1,479};
+\fi
+% Full context
+\node[lab] at (-0.15,-4.5) {Full context};
+\node[q] at (0.3,-4.5) {$q$};
+\foreach \i in {1,...,7} \node[blk] at (0.75+\i*\dx-0.6,-4.5) {SOP \i};
+\node[tok] at (10.2,-4.5) {2,722};
+\end{tikzpicture}}
+\caption{Context supplied to the generator by the main comparison systems. Because every SOP fits in one 1,700-character chunk, each retrieved chunk is a complete SOP, so top-3 retrieval always places three procedures in the prompt (Section~3.3). Workflow GraphRAG and the selection-matched ablation share the selection rule and the same top-3 supporting chunks, which may come from unselected SOPs, and differ only in how the selected procedure $p^\ast$ is represented. Token counts are means over all 40 questions and include the shared prompt template and question.}
+\label{fig:prompt}
+\end{figure}
 
 %% ===================================================================
 \section{Experimental setup}
@@ -411,7 +555,7 @@ Full-Context Prompting & All 7 SOP documents provided directly in generator prom
 \end{table}
 
 \subsection{Custom entity-graph baseline scope and validity threat}
-We explicitly state that the entity-graph GraphRAG baseline is an author-developed implementation consisting of 17 curated relational triples. It is not an official deployment of Microsoft GraphRAG \cite{edge2024graphrag}, LightRAG \cite{guo2024lightrag}, or HippoRAG \cite{gutierrez2024hipporag}. Because the baseline was constructed by the authors, it represents an empirical point of comparison for basic entity-triple augmentation rather than an exhaustive evaluation of published GraphRAG frameworks. We treat this as an explicit validity constraint in Section~\ref{sec:discussion}.
+We explicitly state that the entity-graph GraphRAG baseline is an author-developed implementation consisting of 17 curated relational triples. It is not an official deployment of Microsoft GraphRAG \cite{edge2024graphrag}, LightRAG \cite{guo2024lightrag}, or HippoRAG \cite{gutierrez2024hipporag}. Because the baseline was constructed by the authors, it represents an empirical point of comparison for basic entity-triple augmentation rather than an exhaustive evaluation of published GraphRAG frameworks. The complete set of triples is listed in Appendix~\ref{app:triples}. We treat this as an explicit validity constraint in Section~\ref{sec:discussion}.
 
 \subsection{Shared infrastructure and experimental controls}
 All retrieval systems share identical underlying infrastructure:
@@ -423,7 +567,7 @@ All retrieval systems share identical underlying infrastructure:
 \end{itemize}
 
 \subsection{Evaluation benchmark}
-We developed a held-out benchmark of 40 questions drafted from the source SOPs (Table~\ref{tab:bench}). The benchmark items were not generated by any evaluated system, and a lexical overlap audit confirmed no question shares ROUGE-L $\geq 0.5$ with the fine-tuning training pairs.
+We developed a held-out benchmark of 40 questions drafted from the source SOPs (Table~\ref{tab:bench}). The benchmark items were not generated by any evaluated system, and a lexical overlap audit confirmed no question shares ROUGE-L $\geq 0.5$ with the fine-tuning training pairs. One example question per category is given in Appendix~\ref{app:examples}.
 
 \begin{table}[!htbp]
 \centering
@@ -533,10 +677,75 @@ Categorical breakdowns (Table~\ref{tab:percat}) indicate that Workflow GraphRAG 
 The comparison between Workflow GraphRAG (0.955 KFR) and Selection-Matched Text RAG (0.962 KFR; Table~\ref{tab:results}) addresses RQ2. The two systems share the identical SOP selection mechanism (Eq.~\eqref{eq:score}) and top-3 supporting chunk retrieval, differing only in whether the primary procedure is supplied as a structured graph block or as raw PDF text.
 
 A paired Wilcoxon signed-rank test on answerable questions ($n=35$) yields a paired mean difference of $-0.007$ [$-0.036$, $0.021$] with $p = 0.59$. Factual scores differ on only 3 of 35 questions. This empirical test does not detect a statistically significant difference between graph-structured context and selection-matched text context. We emphasize that $p=0.59$ does not prove equivalence between the two representations; rather, the data provide no evidence that explicit graph serialization confers an incremental factual accuracy advantage over supplying the selected procedure's raw text on this benchmark.
+Figure~\ref{fig:forest} places this comparison alongside the comparisons against chunk retrieval.
+
+\begin{figure}[!htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.66\textwidth, height=5.0cm,
+  xmin=-0.12, xmax=0.47, ymin=0.4, ymax=4.6,
+  ytick={1,2,3,4},
+  yticklabels={
+    \ifshoworacle Workflow $-$ Selection-Matched\else\fi,
+    Full context $-$ Naive RAG,
+    Workflow $-$ GraphRAG (entity),
+    Workflow $-$ Naive RAG},
+  yticklabel style={font=\scriptsize, align=right},
+  xticklabel style={font=\scriptsize, /pgf/number format/fixed, /pgf/number format/precision=2},
+  xlabel={Paired mean difference in key-fact recall ($n=35$), 95\% bootstrap CI},
+  xlabel style={font=\scriptsize},
+  axis lines*=left, tick align=outside, clip=false,
+  xmajorgrids, grid style={gray!20},
+]
+\draw[gray!70, dashed] (axis cs:0,0.4) -- (axis cs:0,4.6);
+% Workflow - Naive: 0.243 [0.114, 0.381], Holm p = 0.053
+\addplot[blue!70!black, only marks, mark=square*, mark size=2.2pt, error bars/.cd, x dir=both, x explicit, error bar style={thick}]
+  coordinates {(0.243,4) += (0.138,0) -= (0.129,0)};
+% Workflow - GraphRAG: 0.257 [0.133, 0.395], Holm p = 0.034
+\addplot[blue!70!black, only marks, mark=square*, mark size=2.2pt, error bars/.cd, x dir=both, x explicit, error bar style={thick}]
+  coordinates {(0.257,3) += (0.138,0) -= (0.124,0)};
+% Full context - Naive: 0.250 [0.121, 0.400], Holm p = 0.053
+\addplot[black, only marks, mark=triangle*, mark size=2.4pt, error bars/.cd, x dir=both, x explicit, error bar style={thick}]
+  coordinates {(0.250,2) += (0.150,0) -= (0.129,0)};
+\ifshoworacle
+% Workflow - Selection-Matched: -0.007 [-0.036, 0.021], Wilcoxon p = 0.59 (paper text; not in repository)
+\addplot[blue!70!black, only marks, mark=square, mark size=2.2pt, error bars/.cd, x dir=both, x explicit, error bar style={thick}]
+  coordinates {(-0.007,1) += (0.028,0) -= (0.029,0)};
+\node[font=\scriptsize, anchor=west] at (axis cs:0.405,1) {$p=0.59$};
+\fi
+\node[font=\scriptsize, anchor=west] at (axis cs:0.405,4) {$p_{\mathrm{Holm}}=0.053$};
+\node[font=\scriptsize, anchor=west] at (axis cs:0.405,3) {$p_{\mathrm{Holm}}=0.034$};
+\node[font=\scriptsize, anchor=west] at (axis cs:0.405,2) {$p_{\mathrm{Holm}}=0.053$};
+\end{axis}
+\end{tikzpicture}
+\caption{Paired differences in key-fact recall on the 35 answerable questions, with 95\% bootstrap confidence intervals and two-sided Wilcoxon signed-rank $p$-values (Holm-adjusted within each reference family). Gains over chunk retrieval appear for both Workflow GraphRAG and full-context prompting, whereas the selection-matched comparison, which holds procedure selection fixed, is centred near zero.}
+\label{fig:forest}
+\end{figure}
 
 The apparent difference in step coverage (1.000 for Workflow GraphRAG vs.\ 0.975 for Selection-Matched Text RAG) traces to a single procedural item (UKT-P1). As identified in Section~\ref{sec:audit}, the ablation system formatted actor and action on distinct markdown lines, preventing the line-based deterministic scorer from registering step co-occurrence despite all 11 steps being present in the generated text.
 
-Regarding selection performance, exactly 36 items in the benchmark assign a single procedure in their metadata (32 answerable single-SOP questions and 4 unanswerable questions tied to specific procedural topics, namely NA-1, NA-2, NA-3, NA-5). The remaining 4 items comprise 3 cross-SOP questions (X-1, X-2, X-3) and 1 non-SOP unanswerable question (NA-4). For all 32 single-SOP answerable questions, the selection rule identified the correct single procedure. For the 4 unanswerable single-SOP items, the selector identified the topical procedure for 3 items (NA-1, NA-2, NA-3), allowing the generator to produce evidence-grounded refusals, and returned no match for 1 item (NA-5), triggering deterministic refusal. Across all 36 single-procedure items, the selector operated without misrouting between procedures.
+Regarding selection performance, exactly 36 items in the benchmark assign a single procedure in their metadata (32 answerable single-SOP questions and 4 unanswerable questions tied to specific procedural topics, namely NA-1, NA-2, NA-3, NA-5). The remaining 4 items comprise 3 cross-SOP questions (X-1, X-2, X-3) and 1 non-SOP unanswerable question (NA-4). For all 32 single-SOP answerable questions, the selection rule identified the correct single procedure. For the 4 unanswerable single-SOP items, the selector identified the topical procedure for 3 items (NA-1, NA-2, NA-3), allowing the generator to produce evidence-grounded refusals, and returned no match for 1 item (NA-5), triggering deterministic refusal. Across all 36 single-procedure items, the selector operated without misrouting between procedures. Table~\ref{tab:selection} summarises these outcomes; for each of the three cross-SOP questions, the selector chose one of the procedures involved.
+
+\begin{table}[!htbp]
+\centering
+\caption{Outcome of the rule-based SOP selector (Eq.~\eqref{eq:score}) for Workflow GraphRAG on all 40 benchmark questions, read from the \texttt{matched\_sop} field of the run log.}
+\label{tab:selection}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.7cm} r >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{3.0cm}}
+\toprule
+Question group & $n$ & Selector outcome & Consequence \\
+\midrule
+Answerable, single SOP & 32 & Correct SOP selected (32/32) & Workflow block of correct SOP in prompt \\
+Answerable, cross-SOP (X-1--X-3) & 3 & One of the involved SOPs selected (X-1: Reactivation; X-2: Academic leave; X-3: Course registration) & Other SOPs reach the prompt only via supporting chunks \\
+Unanswerable, SOP topic (NA-1--NA-3) & 3 & Topical SOP selected & Generator abstained (3/3) \\
+Unanswerable, no match (NA-4, NA-5) & 2 & No SOP reaches $s \geq 3$ & Deterministic refusal before generation \\
+\midrule
+Total & 40 & No misrouting between procedures & \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 Supplementary Ragas evaluations align with this finding: \texttt{llama3.1:8b} rates Workflow GraphRAG at 0.805 faithfulness and 0.682 relevancy, compared to 0.762/0.549 for Naive RAG and 0.743/0.537 for GraphRAG, confirming directional alignment.
 
@@ -549,6 +758,62 @@ Importantly, Workflow GraphRAG's refusal behavior combines pre-generation filter
 
 \subsection{Computational efficiency and resource trade-offs (RQ4)}
 Table~\ref{tab:cost} summarizes system efficiency across token consumption, generator calls, and median latency. Workflow GraphRAG consumes an average of 1,525 prompt tokens per query across the 40 benchmark questions. This represents an increase over Naive RAG (916 tokens) and custom entity-graph GraphRAG (949 tokens) due to serializing the complete workflow block. However, compared to Full-Context Prompting (2,722 tokens), Workflow GraphRAG achieves a 44\% prompt-token reduction (operating at $\approx$56\% of full-context volume) while attaining numerically close key-fact recall (0.955 vs.\ 0.962).
+Figure~\ref{fig:tradeoff} plots this trade-off for all evaluated systems.
+
+\begin{figure}[!htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.82\textwidth, height=6.4cm,
+  xmin=0, xmax=3000, ymin=0, ymax=1.05,
+  xlabel={Mean prompt tokens per question (all 40 questions)},
+  ylabel={Key-fact recall ($n=35$)},
+  xlabel style={font=\scriptsize}, ylabel style={font=\scriptsize},
+  ticklabel style={font=\scriptsize},
+  scaled x ticks=false, xtick={0,500,...,3000}, xticklabel style={/pgf/number format/1000 sep={}},
+  axis lines*=left, tick align=outside, clip=false,
+  grid=major, grid style={gray!20},
+  error bars/error bar style={gray!70},
+]
+% chunk-retrieval baselines
+\addplot[black, only marks, mark=*, mark size=1.8pt, error bars/.cd, y dir=both, y explicit]
+coordinates {
+ (916,0.712)  += (0,0.128) -= (0,0.141)
+ (882,0.683)  += (0,0.136) -= (0,0.147)
+ (949,0.698)  += (0,0.131) -= (0,0.138)
+ (994,0.702)  += (0,0.129) -= (0,0.140)
+ (1815,0.712) += (0,0.128) -= (0,0.141)
+ (725,0.569)  += (0,0.150) -= (0,0.155)
+};
+% reference systems
+\addplot[black, only marks, mark=triangle*, mark size=2.4pt, error bars/.cd, y dir=both, y explicit]
+coordinates {
+ (107,0.113)  += (0,0.070) -= (0,0.063)
+ (2722,0.962) += (0,0.038) -= (0,0.048)
+};
+% proposed
+\addplot[blue!70!black, only marks, mark=square*, mark size=2.2pt, error bars/.cd, y dir=both, y explicit]
+coordinates {(1525,0.955) += (0,0.035) -= (0,0.038)};
+\ifshoworacle
+\addplot[blue!70!black, only marks, mark=square, mark size=2.2pt, error bars/.cd, y dir=both, y explicit]
+coordinates {(1479,0.962) += (0,0.038) -= (0,0.048)};
+\node[font=\tiny, anchor=east, blue!70!black] at (axis cs:1440,1.01) {Selection-Matched};
+\fi
+% labels
+\node[font=\tiny, anchor=north west] at (axis cs:1010,0.62) {Naive, Hybrid, GraphRAG, Multimodal};
+\draw[gray!70, thin] (axis cs:1000,0.62) -- (axis cs:960,0.67);
+\node[font=\tiny, anchor=north] at (axis cs:725,0.40) {CRAG};
+\node[font=\tiny, anchor=west] at (axis cs:1850,0.712) {Agentic};
+\node[font=\tiny, anchor=west] at (axis cs:150,0.113) {LLM only};
+\node[font=\tiny, anchor=east, blue!70!black] at (axis cs:1430,0.875) {\textbf{Workflow GraphRAG}};
+\draw[blue!70!black, thin] (axis cs:1435,0.88) -- (axis cs:1515,0.945);
+\node[font=\tiny, anchor=east] at (axis cs:2680,0.962) {Full context};
+\draw[{Stealth[length=1.6mm]}-{Stealth[length=1.6mm]}, gray!70!black] (axis cs:1545,0.88) -- node[above, font=\tiny]{$-44\%$ prompt tokens} (axis cs:2702,0.88);
+\end{axis}
+\end{tikzpicture}
+\caption{Key-fact recall against mean prompt tokens for all evaluated systems. Error bars show 95\% bootstrap confidence intervals. Circles: chunk-retrieval baselines; triangles: reference systems; squares: systems using rule-based SOP selection. Workflow GraphRAG reaches recall numerically close to full-context prompting with 44\% fewer prompt tokens.}
+\label{fig:tradeoff}
+\end{figure}
 
 \begin{table}[!htbp]
 \centering
@@ -579,6 +844,34 @@ To examine retrieval sensitivity, we repeated evaluations of Naive RAG, GraphRAG
 \end{table}
 
 Under the base embedding model, Naive RAG performance increases substantially from 0.712 to 0.910 KFR (and step coverage from 0.727 to 0.898). Similarly, custom entity-graph GraphRAG increases from 0.698 to 0.900 KFR. Workflow GraphRAG remains consistent at 0.955 KFR.
+Figure~\ref{fig:embedding} visualises this shift.
+
+\begin{figure}[!htbp]
+\centering
+\begin{tikzpicture}
+\pgfplotsset{abl/.style={
+  width=0.42\textwidth, height=5.2cm,
+  xmin=-0.3, xmax=1.3, ymin=0.6, ymax=1.03,
+  xtick={0,1}, xticklabels={Fine-tuned (v3), Base},
+  ticklabel style={font=\scriptsize}, title style={font=\scriptsize\bfseries},
+  axis lines*=left, tick align=outside, ymajorgrids, grid style={gray!20},
+  yticklabel style={/pgf/number format/fixed, /pgf/number format/precision=2}}}
+\begin{axis}[abl, name=kfr, title={Key-fact recall ($n=35$)}]
+\addplot[black, mark=*, mark size=1.8pt] coordinates {(0,0.712) (1,0.910)};
+\addplot[black, dashed, mark=triangle*, mark size=2.2pt] coordinates {(0,0.698) (1,0.900)};
+\addplot[blue!70!black, thick, mark=square*, mark size=2pt] coordinates {(0,0.955) (1,0.955)};
+\end{axis}
+\begin{axis}[abl, at={(kfr.east)}, anchor=west, xshift=1.1cm, title={Step coverage ($n=11$)},
+  legend style={font=\scriptsize, draw=none, at={(-0.15,-0.28)}, anchor=north, legend columns=3, /tikz/every even column/.append style={column sep=6pt}}]
+\addplot[black, mark=*, mark size=1.8pt] coordinates {(0,0.727) (1,0.898)};
+\addplot[black, dashed, mark=triangle*, mark size=2.2pt] coordinates {(0,0.687) (1,0.865)};
+\addplot[blue!70!black, thick, mark=square*, mark size=2pt] coordinates {(0,1.000) (1,1.000)};
+\legend{Naive RAG, GraphRAG (entity), Workflow GraphRAG}
+\end{axis}
+\end{tikzpicture}
+\caption{Embedding sensitivity: key-fact recall and step coverage with the fine-tuned (v3) and the non-fine-tuned base \texttt{all-indo-e5-small-v4} embedding. Chunk-retrieval baselines improve markedly with the base model, whereas Workflow GraphRAG is unchanged.}
+\label{fig:embedding}
+\end{figure}
 
 This reveals substantial sensitivity to embedding configuration. Replacing the fine-tuned checkpoint with its base counterpart substantially improved the retrieval and recall performance of conventional chunk-based baselines, while Workflow GraphRAG remained consistent at 0.955 KFR. Although overfitting to the phrasing of the 50 fine-tuning question-answer pairs is a plausible hypothesis, the present experiments do not establish the definitive mechanism behind this degradation. Alternative factors include objective mismatch between contrastive loss and administrative chunk retrieval, training instability on small sample volumes, or distortions in embedding-space geometry. Regardless of the underlying cause, this comparison demonstrates that well-configured standard retrieval baselines perform competitively on this corpus (0.910 KFR), substantially narrowing the performance margin between conventional chunk retrieval and workflow-guided methods.
 
@@ -664,6 +957,65 @@ Table~\ref{tab:results-full} presents the complete evaluation results across all
 \setlength{\tabcolsep}{2pt}
 \resizebox{\textwidth}{!}{%
 \input{paper_tables/main_results_full.tex}}
+\end{table}
+
+\section{Entity-graph baseline triples}
+\label{app:triples}
+Table~\ref{tab:triples} lists the 17 relational triples used by the custom entity-graph GraphRAG baseline.
+
+\begin{table}[!htbp]
+\centering
+\caption{The 17 hand-curated relational triples of the custom entity-graph GraphRAG baseline, as defined in \texttt{src/engine.py}. Entities and relations are kept in their original Indonesian form.}
+\label{tab:triples}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{rlll}
+\toprule
+\# & Head entity & Tail entity & Relation \\
+\midrule
+1 & cuti akademik & izin cuti & prosedur pengajuan \\
+2 & cuti akademik & aktif kembali & alur lanjutan \\
+3 & cuti akademik & ketua program studi & rekomendasi \& persetujuan \\
+4 & cuti akademik & dekan & penerbitan SK izin \\
+5 & cuti akademik & spp/ukt & syarat bebas tunggakan \\
+6 & legalisir & ijazah & dokumen objek \\
+7 & legalisir & transkrip & dokumen objek \\
+8 & legalisir & subbagian akademik & verifikasi \& validasi \\
+9 & beasiswa & rekomendasi beasiswa & dokumen pengajuan \\
+10 & beasiswa & wakil dekan i & pengesahan surat \\
+11 & ukt & keterlambatan pembayaran & permohonan dispensasi \\
+12 & ukt & bagian keuangan fsm & verifikasi pembayaran \\
+13 & irs & pengisian irs & registrasi akademik per semester \\
+14 & irs & dosen wali & bimbingan \& persetujuan online \\
+15 & irs & siap undip & portal sistem informasi \\
+16 & organisasi mahasiswa & proposal kegiatan & pengajuan persetujuan \\
+17 & organisasi mahasiswa & wakil dekan i & persetujuan kegiatan \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Example benchmark questions}
+\label{app:examples}
+Table~\ref{tab:examples} gives one benchmark question per category.
+
+\begin{table}[!htbp]
+\centering
+\caption{One benchmark question per category from \texttt{sop\_benchmark\_v1.json}, with English glosses.}
+\label{tab:examples}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{l l >{\raggedright\arraybackslash}X}
+\toprule
+ID & Category & Question (Indonesian) / English gloss \\
+\midrule
+CUTI-P1 & Procedural & \textit{Apa saja tahapan mengajukan cuti akademik di FSM dari awal sampai surat izin keluar, dan siapa yang mengerjakan tiap tahap?} \newline What are the steps for applying for academic leave at FSM, from the start until the permit letter is issued, and who performs each step? \\
+CUTI-A1 & Actor & \textit{Setelah form cuti saya ditandatangani Kaprodi, form itu diserahkan ke siapa dan diproses oleh bagian apa?} \newline After the Head of Study Programme signs my leave form, to whom is it submitted and which unit processes it? \\
+CUTI-D1 & Documents & \textit{Dokumen apa saja yang harus dilampirkan saat mengajukan cuti akademik?} \newline Which documents must be attached when applying for academic leave? \\
+CUTI-T1 & Time/location & \textit{Berapa lama maksimal proses izin cuti akademik, dan di mana saya mengambil Surat Izin Dekan?} \newline What is the maximum processing time for an academic leave permit, and where do I collect the Dean's permit letter? \\
+X-1 & Cross-SOP & \textit{Apa perbedaan dokumen yang dibawa untuk mengajukan cuti akademik dengan untuk aktif kembali setelah cuti?} \newline How do the documents required for academic leave differ from those required for reactivation after leave? \\
+NA-1 & Unanswerable & \textit{Berapa biaya legalisir ijazah per lembar di FSM?} \newline How much does diploma legalisation cost per sheet at FSM? \\
+\bottomrule
+\end{tabularx}
 \end{table}
 
 %% ===================================================================

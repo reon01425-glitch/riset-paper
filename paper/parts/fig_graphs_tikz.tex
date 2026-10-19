@@ -1,0 +1,67 @@
+% ---- Paste into Section "Workflow graph construction" (after the paragraph ending "...align exactly with source PDFs.") ----
+% Uses only libraries already loaded in the preamble: positioning, arrows.meta, fit, backgrounds.
+\begin{figure}[!htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  box/.style={execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000}, draw, rounded corners=2pt, align=center, font=\scriptsize, minimum height=9mm, text width=21mm, fill=white},
+  new/.style={box, draw=blue!70!black, fill=blue!6, thick},
+  pill/.style={draw, rounded corners=3.5mm, align=center, font=\scriptsize, minimum height=7mm, inner xsep=2mm, fill=gray!12},
+  ghost/.style={draw=gray!60, dashed, rounded corners=2pt, align=center, font=\scriptsize, text=gray!70!black, minimum height=7mm, text width=17mm},
+  arr/.style={-{Stealth[length=2mm]}, thick},
+  next/.style={-{Stealth[length=2.2mm]}, very thick, blue!70!black},
+  has/.style={-{Stealth[length=1.8mm]}, gray!70!black, dashed},
+  perf/.style={-{Stealth[length=1.8mm]}, densely dotted, thick},
+  rel/.style={thick},
+  lane/.style={draw=gray!50, rounded corners=4pt, fill=gray!6, inner sep=2.5mm}
+]
+% ===================== (a) Workflow graph (proposed) =====================
+\node[new, text width=52mm] (root) at (2.9,0)
+  {\textbf{Root} $v_{\text{root}}$: Reactivation after leave\\[-1pt]{\tiny title $\cdot$ aliases $\cdot$ max.\ duration}};
+\node[new] (s1) at (0,-1.9)   {$v_1$: Submit leave\\letter + KTM copy};
+\node[new] (s2) at (2.9,-1.9) {$v_2$: Register\\online via SSO};
+\node[new] (s3) at (5.8,-1.9) {$v_3$: Recorded\\as active student};
+\draw[has] (root.south) ++(-1.8,0) -- (s1.north);
+\draw[has] (root.south) -- (s2.north);
+\draw[has] (root.south) ++(1.8,0) -- (s3.north);
+\draw[next] (s1) -- (s2);
+\draw[next] (s2) -- (s3);
+\node[pill] (act) at (2.9,-3.55) {$v_{\text{actor}}$: Mahasiswa (Student)};
+\draw[perf] (act.north west) ++(0.25,0) -- (s1.south);
+\draw[perf] (act.north) -- (s2.south);
+\draw[perf] (act.north east) ++(-0.25,0) -- (s3.south);
+\node[ghost] (oth) at (6.7,-3.55) {steps of\\other SOPs};
+\draw[perf, gray!70!black] (act.east) -- (oth.west);
+\node[draw, rounded corners=2pt, fill=white, font=\scriptsize, align=left, execute at begin node={\hyphenpenalty=10000}, text width=74mm] (attr) at (3.1,-4.85)
+  {\textbf{Step node $v_i$ attributes:} performing actor, action, required input documents, outputs, duration, verbatim PDF quote};
+% ===================== (b) Entity-graph baseline =====================
+\node[box] (q) at (12.0,0) {Question};
+\node[pill, fill=gray!25, font=\scriptsize\bfseries] (ent) at (12.0,-1.55) {``cuti akademik''};
+\draw[arr] (q) -- node[right, font=\tiny]{entity keyword match} (ent);
+\node[pill] (n1) at (10.4,-3.0)  {``dekan''};
+\node[pill] (n2) at (12.0,-3.0) {\dots};
+\node[pill] (n3) at (13.6,-3.0) {\dots};
+\draw[rel] (ent) -- node[above left, pos=0.55, font=\tiny, align=right, inner sep=1pt, xshift=-1mm]{penerbitan\\SK izin} (n1);
+\draw[rel] (ent) -- (n2);
+\draw[rel] (ent) -- (n3);
+\node[draw, dashed, rounded corners=3pt, fit=(n1)(n3), inner sep=1.5mm,
+      label={[font=\tiny, anchor=north east, inner sep=1pt]south east:1-hop neighbours}] (hop) {};
+\node[box, text width=40mm] (pr) at (12.0,-4.85) {Prompt: matched triples $(h,r,t)$\\+ top-3 dense chunks};
+\draw[arr] (pr.north |- hop.south) -- (pr.north);
+% ===================== Panels and legend =====================
+\begin{scope}[on background layer]
+\node[lane, fit=(root)(s1)(s3)(act)(oth)(attr)] (pa) {};
+\node[lane, fit=(q)(n1)(n3)(hop)(pr), inner xsep=4mm] (pb) {};
+\end{scope}
+\node[font=\scriptsize\bfseries, anchor=south west] at (pa.north west) {(a) Workflow graph (proposed): directed};
+\node[font=\scriptsize\bfseries, anchor=south west] at (pb.north west) {(b) Entity-graph baseline: undirected};
+\begin{scope}[yshift=-6.25cm, font=\scriptsize]
+\draw[next] (-0.9,0) -- (-0.2,0); \node[anchor=west] at (-0.1,0) {\texttt{NEXT\_STEP}};
+\draw[has]  (1.8,0) -- (2.5,0);   \node[anchor=west] at (2.6,0)  {\texttt{HAS\_STEP}};
+\draw[perf] (4.4,0) -- (5.1,0);   \node[anchor=west] at (5.2,0)  {\texttt{PERFORMS}};
+\draw[rel]  (9.8,0) -- (10.5,0);   \node[anchor=west] at (10.6,0)  {curated relation (\texttt{nx.Graph})};
+\end{scope}
+\end{tikzpicture}}
+\caption{Graph representations compared in this study. (a) The proposed workflow graph, shown for the \emph{Reactivation after leave} SOP: the root node links to each step via \texttt{HAS\_STEP}, \texttt{NEXT\_STEP} edges encode execution order, and \texttt{PERFORMS} edges attribute each step to an actor node shared across procedures. The full graph contains 7 root, 44 step, and 15 actor nodes connected by 125 directed edges. (b) The custom entity-graph baseline: question entities are matched against 17 curated relational triples in an undirected graph, and the 1-hop triples are prepended to the top-3 dense chunks.}
+\label{fig:graphs}
+\end{figure}
